@@ -1,0 +1,33 @@
+FROM ubuntu:16.04
+
+LABEL maintainer "coveo"
+
+# Config for dockerize
+ENV DOCKERIZE_VERSION v0.5.0
+
+# Config for Foreman
+ENV FOREMAN_RELEASE 1.15
+
+# Install Supervisor
+RUN apt-get update && \
+  DEBIAN_FRONTEND=noninteractive apt-get install -y supervisor
+
+# Install dockerize
+RUN apt-get update && apt-get install -y wget
+RUN wget -q https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
+    && tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
+    && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
+
+# Install Foreman-Installer
+RUN wget -q https://deb.theforeman.org/pubkey.gpg -O- | apt-key add - && \
+    echo "deb http://deb.theforeman.org/ xenial $FOREMAN_RELEASE" > /etc/apt/sources.list.d/foreman.list && \
+    apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y \
+      foreman-installer
+
+COPY files/foreman-install /foreman-installer
+COPY files/supervisord /etc/supervisor
+RUN chmod +x /foreman-installer/entrypoint.sh
+
+ENTRYPOINT ["/foreman-installer/entrypoint.sh"]
+CMD ["supervisord", "-c", "/etc/supervisor/supervisord.conf"]

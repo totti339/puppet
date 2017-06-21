@@ -1,0 +1,4 @@
+#!/bin/bash
+
+foreman-installer \
+{{ range split .Env.INSTALLER_OPTIONS "," }}--{{.}} {{ end }}
