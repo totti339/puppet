@@ -14,7 +14,8 @@ RUN apt-get update && \
   DEBIAN_FRONTEND=noninteractive apt-get install -y supervisor
 
 # Install Puppet 
-RUN wget -q https://apt.puppetlabs.com/puppetlabs-release-pc1-xenial.deb -O- | dpkg -i - && \
+RUN apt-get install wget && \
+    wget -q https://apt.puppetlabs.com/puppetlabs-release-pc1-xenial.deb -O- | dpkg -i - && \
     apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y puppetmaster=$PUPPETMASTER_SERVER-2ubuntu0.1 && \
     apt-get -y clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
